@@ -29,7 +29,7 @@ const requireFrom = createRequire(import.meta.url)
 function loadRoutingModule(ref: NavigationRef): RoutingModule {
   const root = dirname(requireFrom.resolve('expo-router/package.json'))
   const source = readFileSync(join(root, 'build/global-state/routing.js'), 'utf8')
-  const loaded = { exports: {} as Record<string, unknown> }
+  const loaded: { exports: Partial<RoutingModule> } = { exports: {} }
   const stubs: Record<string, unknown> = {
     'expo/dom': { IS_DOM: false },
     './router-store': { store: { navigationRef: { isReady: () => true, ...ref } } },
@@ -40,10 +40,13 @@ function loadRoutingModule(ref: NavigationRef): RoutingModule {
     loaded.exports,
     loaded
   )
-  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: the three members read
-  // below are the ones this file's `exports.` assignments define; the stubs cover every import it
-  // makes, so evaluation either defines all of them or throws above.
-  return loaded.exports as unknown as RoutingModule
+  const { canGoBack, goBack, routingQueue } = loaded.exports
+  // Read rather than asserted: a stub that stopped covering an import would leave these undefined,
+  // and a test driving a half-evaluated module is worse than one that says so.
+  if (canGoBack === undefined || goBack === undefined || routingQueue === undefined) {
+    throw new Error('the routing module did not define canGoBack, goBack and routingQueue')
+  }
+  return { canGoBack, goBack, routingQueue }
 }
 
 /** A stack the real `GO_BACK` action pops, so a pop that was queued twice is visible as two. */
@@ -60,8 +63,10 @@ function stackRef(screens: string[]): NavigationRef {
   }
 }
 
-const router = vi.hoisted(() => ({
-  value: null as { canGoBack: () => boolean; back: () => void } | null,
+type MountedRouter = { canGoBack: () => boolean; back: () => void }
+
+const router = vi.hoisted((): { value: MountedRouter | null; pathname: string } => ({
+  value: null,
   pathname: '/h/host-a/tasks'
 }))
 
