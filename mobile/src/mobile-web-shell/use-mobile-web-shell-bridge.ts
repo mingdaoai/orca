@@ -7,6 +7,7 @@ import { useHostClient } from '../transport/client-context'
 import { createBridgeDiagnosticReporter } from './bridge-diagnostic-log'
 import type { BridgeInitRoute } from './bridge/bridge-envelope'
 import { createBridgeHost, type BridgeHost } from './bridge-host'
+import type { BridgeNavigateBackOutcome } from './bridge-host-contract'
 import type { BridgeErrorCapture } from './bridge/bridge-error-capture'
 import type { MobileWebShellSessionState } from './mobile-web-shell-session-contract'
 import type { PageHostSnapshot } from './use-page-host-snapshot'
@@ -61,8 +62,8 @@ export function useMobileWebShellBridge(args: {
   pageRoutes: readonly string[]
   /** Opens a screen the page does not render, over the still-mounted view. */
   onNavigate: (href: string) => void
-  /** Pops the stack this page was pushed onto. False when there was nothing left to pop. */
-  onNavigateBack: () => boolean
+  /** Pops the stack this page was pushed onto, and says so when it did not. */
+  onNavigateBack: () => BridgeNavigateBackOutcome
   /**
    * This host and its stored keys, or null while they are being read. No host is built without
    * them: `init` is answered once per `ready` and carries both, so a host that started without

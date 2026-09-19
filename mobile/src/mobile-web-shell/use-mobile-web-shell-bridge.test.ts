@@ -122,7 +122,7 @@ function Harness(props: {
     onNavigate: (href) => props.probe.navigations.push(href),
     onNavigateBack: () => {
       props.probe.backPops += 1
-      return true
+      return 'popped'
     },
     snapshot: SNAPSHOT,
     readStorage: () => STORAGE,

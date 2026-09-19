@@ -203,18 +203,25 @@ describe('navigate-back', () => {
     const bridge = harness()
     bridge.host.receive(clientFrame({ type: 'ready' }))
     bridge.host.receive(back)
-    expect(bridge.backPops).toEqual([true])
+    expect(bridge.backPops).toEqual(['popped'])
     expect(bridge.navigations).toEqual([])
     expect(bridge.client.requests).toHaveLength(0)
     expect(bridge.diagnostics).toEqual([])
   })
 
   it('reports the pop that found nothing, because the page hears nothing either way', () => {
-    const bridge = harness({ onNavigateBack: () => false })
+    const bridge = harness({ onNavigateBack: () => 'nothing-to-pop' })
     bridge.host.receive(clientFrame({ type: 'ready' }))
     bridge.host.receive(back)
-    expect(bridge.backPops).toEqual([false])
-    expect(bridge.diagnostics).toEqual([{ kind: 'navigate-back-refused' }])
+    expect(bridge.backPops).toEqual(['nothing-to-pop'])
+    expect(bridge.diagnostics).toEqual([{ kind: 'navigate-back-refused', why: 'nothing-to-pop' }])
+  })
+
+  it('names a pop refused for a pop already pending, which is a different bug', () => {
+    const bridge = harness({ onNavigateBack: () => 'pop-pending' })
+    bridge.host.receive(clientFrame({ type: 'ready' }))
+    bridge.host.receive(back)
+    expect(bridge.diagnostics).toEqual([{ kind: 'navigate-back-refused', why: 'pop-pending' }])
   })
 
   it('refuses it from a page that has not asked for a session', () => {

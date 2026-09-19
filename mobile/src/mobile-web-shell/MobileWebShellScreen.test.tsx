@@ -17,6 +17,7 @@ type ScreenDependencies = {
   back: Mock
   /** What the native stack answers: false is a page opened as the first screen on it. */
   canGoBack: boolean
+  pathname: string
   pageRoutes: readonly string[]
   lifecycle: string[]
   state: MobileWebShellSessionState
@@ -39,6 +40,7 @@ const dependencies = vi.hoisted((): ScreenDependencies => {
     push: vi.fn(),
     back: vi.fn(),
     canGoBack: true,
+    pathname: '/h/host-1',
     pageRoutes: ['/h/[hostId]'],
     lifecycle: [],
     state: { kind: 'checking' },
@@ -64,7 +66,9 @@ vi.mock('expo-router', () => ({
     push: dependencies.push,
     back: dependencies.back,
     canGoBack: () => dependencies.canGoBack
-  })
+  }),
+  // Read by the pop latch, which clears on the route this shell is mounted at changing.
+  usePathname: () => dependencies.pathname
 }))
 // A component rather than a host string: the React key is what makes a retry a rebuilt WebView,
 // and a mount/unmount log is the only thing that can tell a remount from a prop update.
@@ -193,6 +197,7 @@ describe('the hybrid shell screen', () => {
     dependencies.client = null
     dependencies.back.mockReset()
     dependencies.canGoBack = true
+    dependencies.pathname = '/h/host-1'
   })
 
   it('renders the update wall for a bundle verdict, with no shell view', async () => {
@@ -415,9 +420,10 @@ describe('the hybrid shell screen', () => {
     })
     expect(dependencies.back).not.toHaveBeenCalled()
     // The page is told nothing either way, so the log is the only thing a dead Back button leaves.
-    expect(warned.mock.calls.map(([message]) => message)).toContain(
-      '[web-shell-bridge] the page asked to go back with nothing on the stack'
-    )
+    expect(warned.mock.calls).toContainEqual([
+      '[web-shell-bridge] did not pop the stack for a page going back',
+      { why: 'nothing-to-pop' }
+    ])
     warned.mockRestore()
   })
 

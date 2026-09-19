@@ -214,11 +214,12 @@ export function createBridgeHost(options: BridgeHostOptions): BridgeHost {
         return
       }
       if (message.name === BRIDGE_NAVIGATE_BACK_NOTIFY) {
-        // Local too, and the one notify with no argument: the shell pops what it pushed. A pop that
-        // found nothing is reported rather than answered, because the page is told nothing either
-        // way and a Back button that does nothing is what would otherwise go unnoticed.
-        if (!options.onNavigateBack()) {
-          options.onDiagnostic?.({ kind: 'navigate-back-refused' })
+        // Local too, and the one notify with no argument: the shell pops what it pushed. A pop the
+        // shell did not make is reported rather than answered, because the page is told nothing
+        // either way and a Back button that does nothing is what would otherwise go unnoticed.
+        const outcome = options.onNavigateBack()
+        if (outcome !== 'popped') {
+          options.onDiagnostic?.({ kind: 'navigate-back-refused', why: outcome })
         }
         return
       }
