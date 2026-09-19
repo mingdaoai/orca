@@ -1,45 +1,44 @@
-diff --git a/src/main/claude/claude-transcript-branch-proof.ts b/src/main/claude/claude-transcript-branch-proof.ts
-index c27f128134..d5a0c918cf 100644
+===================================================================
 --- a/src/main/claude/claude-transcript-branch-proof.ts
 +++ b/src/main/claude/claude-transcript-branch-proof.ts
-@@ -1 +1,2 @@
+@@ -1,1 +1,2 @@
 -import { readFile } from 'node:fs/promises'
 +import { open } from 'node:fs/promises'
 +import { splitTranscriptStreamLines } from '../native-chat/transcript-stream-lines'
-@@ -4,0 +6,6 @@ const MAX_CLAUDE_TRANSCRIPT_ANCESTRY = 10_000
+@@ -4,0 +6,6 @@
 +class ClaudeTranscriptMarkerMissingError extends Error {
 +  constructor() {
 +    super('Claude transcript branch proof failed: missing last-prompt marker')
 +  }
 +}
 +
-@@ -82,2 +89 @@ function proveAppendOrder(nodes: Map<string, TranscriptNode>): void {
+@@ -82,2 +89,1 @@
 -export function proveClaudeTranscriptBranchFromJsonl(input: {
 -  contents: string
 +type BranchProofInput = {
-@@ -87 +93,3 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -87,1 +93,3 @@
 -}): ClaudeTranscriptBranchProof {
 +}
 +
 +function createBranchProof(input: BranchProofInput) {
-@@ -91,2 +99,3 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -91,2 +99,3 @@
 -  const lines = input.contents.split('\n')
 -  for (const [index, line] of lines.entries()) {
 +  return { add, finish }
 +
 +  function add(line: string, index: number, terminated: boolean): void {
-@@ -94 +103 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -94,1 +103,1 @@
 -      continue
 +      return
-@@ -100 +109 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -100,1 +109,1 @@
 -      if (index === lines.length - 1 && !input.contents.endsWith('\n')) {
 +      if (!terminated) {
-@@ -107,0 +117 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -107,0 +117,1 @@
 +    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: The parsed value is a non-array object checked above.
-@@ -120 +130 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -120,1 +130,1 @@
 -      continue
 +      return
-@@ -149,21 +159,16 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -149,14 +159,4 @@
 -  if (!leafUuid) {
 -    throw transcriptError('missing last-prompt marker')
 -  }
@@ -54,18 +53,17 @@ index c27f128134..d5a0c918cf 100644
 -  if (input.intentionalRewindUuid !== undefined) {
 -    if (leafUuid !== input.intentionalRewindUuid || !input.previousLeafUuid) {
 -      throw transcriptError('rewind target does not match the observed leaf')
--    }
++
++  function finish(): ClaudeTranscriptBranchProof {
++    if (!leafUuid) {
++      throw new ClaudeTranscriptMarkerMissingError()
+@@ -164,6 +164,11 @@
 -    proveMainLineAncestry(nodes, input.previousLeafUuid, input.providerSessionId)
 -    proveAppendOrder(nodes)
 -    let ancestor = nodes.get(input.previousLeafUuid)?.parentUuid ?? null
 -    for (let depth = 0; ancestor !== null && depth < MAX_CLAUDE_TRANSCRIPT_ANCESTRY; depth += 1) {
 -      if (ancestor === leafUuid) {
 -        return { leafUuid, relation: 'intentional-rewind' }
-+
-+  function finish(): ClaudeTranscriptBranchProof {
-+    if (!leafUuid) {
-+      throw new ClaudeTranscriptMarkerMissingError()
-+    }
 +    const leaf = nodes.get(leafUuid)
 +    if (!leaf || leaf.sessionId !== input.providerSessionId || leaf.disallowedLeaf) {
 +      throw transcriptError('marker leaf is missing from the session graph')
@@ -77,7 +75,7 @@ index c27f128134..d5a0c918cf 100644
 +    if (input.intentionalRewindUuid !== undefined) {
 +      if (leafUuid !== input.intentionalRewindUuid || !input.previousLeafUuid) {
 +        throw transcriptError('rewind target does not match the observed leaf')
-@@ -171 +176,10 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -171,1 +176,10 @@
 -      ancestor = nodes.get(ancestor)?.parentUuid ?? null
 +      proveMainLineAncestry(nodes, input.previousLeafUuid, input.providerSessionId)
 +      proveAppendOrder(nodes)
@@ -89,7 +87,7 @@ index c27f128134..d5a0c918cf 100644
 +        ancestor = nodes.get(ancestor)?.parentUuid ?? null
 +      }
 +      throw transcriptError('rewind target is not an ancestor of the previous cursor')
-@@ -173,31 +187,7 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -173,31 +187,7 @@
 -    throw transcriptError('rewind target is not an ancestor of the previous cursor')
 -  }
 -  if (!previousLeafUuid) {
@@ -128,7 +126,7 @@ index c27f128134..d5a0c918cf 100644
 +      // accepting that graph would turn reordered/torn rows into durable ancestry.
 +      proveAppendOrder(nodes)
 +      return { leafUuid, relation: 'initial' }
-@@ -205,4 +195,3 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -205,4 +195,3 @@
 -    visited.add(cursor)
 -    const node = nodes.get(cursor)
 -    if (!node || node.sessionId !== input.providerSessionId) {
@@ -136,12 +134,12 @@ index c27f128134..d5a0c918cf 100644
 +    const previous = nodes.get(previousLeafUuid)
 +    if (!previous) {
 +      throw new ClaudeTranscriptPreviousCursorMissingError()
-@@ -210,2 +199,2 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -210,2 +199,2 @@
 -    if (node.disallowedLeaf) {
 -      throw transcriptError(`ancestor ${cursor} is not on the main transcript`)
 +    if (previous.sessionId !== input.providerSessionId || previous.disallowedLeaf) {
 +      throw transcriptError('previous cursor is not on the main transcript')
-@@ -213,2 +202,6 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -213,2 +202,6 @@
 -    cursor = node.parentUuid
 -    if (cursor === previousLeafUuid) {
 +    // The latest marker can be equal to, or descend from, a sampled cursor. In
@@ -150,10 +148,10 @@ index c27f128134..d5a0c918cf 100644
 +    // could be persisted and resumed as if it were on the main transcript.
 +    proveMainLineAncestry(nodes, previousLeafUuid, input.providerSessionId)
 +    if (leafUuid === previousLeafUuid) {
-@@ -216 +209 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -216,1 +209,1 @@
 -      return { leafUuid, relation: 'descendant' }
 +      return { leafUuid, relation: 'same' }
-@@ -217,0 +211,24 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -217,0 +211,24 @@
 +    const visited = new Set<string>()
 +    let cursor: string | null = leafUuid
 +    for (let depth = 0; cursor !== null && depth < MAX_CLAUDE_TRANSCRIPT_ANCESTRY; depth += 1) {
@@ -178,7 +176,7 @@ index c27f128134..d5a0c918cf 100644
 +      throw transcriptError('ancestry exceeds the bounded proof limit')
 +    }
 +    throw transcriptError('latest marker is on a sibling branch')
-@@ -219,2 +236,9 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -219,2 +236,9 @@
 -  if (cursor !== null) {
 -    throw transcriptError('ancestry exceeds the bounded proof limit')
 +}
@@ -190,10 +188,10 @@ index c27f128134..d5a0c918cf 100644
 +  const lines = input.contents.split('\n')
 +  for (const [index, line] of lines.entries()) {
 +    proof.add(line, index, index < lines.length - 1)
-@@ -222 +246 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -222,1 +246,1 @@
 -  throw transcriptError('latest marker is on a sibling branch')
 +  return proof.finish()
-@@ -225,12 +249,35 @@ export function proveClaudeTranscriptBranchFromJsonl(input: {
+@@ -225,12 +249,44 @@
 -export async function proveClaudeTranscriptBranch(input: {
 -  transcriptPath: string
 -  providerSessionId: string
@@ -211,32 +209,41 @@ index c27f128134..d5a0c918cf 100644
 +): Promise<ClaudeTranscriptBranchProof> {
 +  const handle = await open(input.transcriptPath, 'r')
 +  try {
-+    // Bound this observation to the opened file's initial prefix.
-+    const stats = await handle.stat()
-+    const proof = createBranchProof(input)
-+    let index = 0
-+    if (stats.size > 0) {
-+      const stream = handle.createReadStream({ start: 0, end: stats.size - 1, autoClose: false })
-+      for await (const record of splitTranscriptStreamLines(stream)) {
-+        proof.add(record.line, index++, record.terminated)
-+      }
-+    }
-+    try {
-+      return proof.finish()
-+    } catch (error) {
-+      if (
-+        error instanceof ClaudeTranscriptMarkerMissingError ||
-+        error instanceof ClaudeTranscriptPreviousCursorMissingError
-+      ) {
-+        const grew = await handle.stat().then(
-+          (current) => current.size > stats.size,
-+          () => false
-+        )
-+        if (grew) {
++    let size = (await handle.stat()).size
++    let refreshed = false
++    while (true) {
++      const proof = createBranchProof(input)
++      let index = 0
++      try {
++        if (size > 0) {
++          const stream = handle.createReadStream({ start: 0, end: size - 1, autoClose: false })
++          for await (const record of splitTranscriptStreamLines(stream)) {
++            proof.add(record.line, index++, record.terminated)
++          }
++        }
++        return proof.finish()
++      } catch (error) {
++        if (
++          !(error instanceof ClaudeTranscriptMarkerMissingError) &&
++          !(error instanceof ClaudeTranscriptPreviousCursorMissingError) &&
++          !(error instanceof ClaudeTranscriptTailIncompleteError)
++        ) {
++          throw error
++        }
++        if (refreshed) {
 +          throw new ClaudeTranscriptTailIncompleteError()
 +        }
++        const nextSize = await handle.stat().then(
++          (current) => current.size,
++          () => size
++        )
++        if (nextSize <= size) {
++          throw error
++        }
++        // Finish an already-appended repair without making the caller retry.
++        size = nextSize
++        refreshed = true
 +      }
-+      throw error
 +    }
 +  } finally {
 +    await handle.close()

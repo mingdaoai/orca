@@ -1,21 +1,43 @@
 {
   "status": "Actual production source; baseline reconstructed by reverse fix.patch; open-ended experiment retained as a control",
   "measurement": "Forced GC at actual JSON.parse boundaries; sampled transient live bytes, not RSS, natural peak, or a retained-leak proof.",
+  "runtime": {
+    "node": "v24.20.0",
+    "electron": null,
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "toolVersions": {
+    "esbuild": "0.25.12",
+    "diff": "8.0.4"
+  },
+  "auditHashes": {
+    "allocation.cjs": "93bdb172e14624a5ff7b30974e3e1c56fafc5724e8b4f973275ead9063e099c9",
+    "candidate-transform.json": "4ac45abd7a095e48455f7d9e715188ae77e789c46f5486c6e8c88d23c69b5a65",
+    "duration.cjs": "5b24ded05da1b21c1e63d2cde33437a016b61780ecca3a30f9430e0dd689f81d",
+    "fix.patch": "cb74ebb7bf7b38303c183cf8ffcb99f82dbc0a7145dad98ab077310890a4899a",
+    "growth.cjs": "6c3e29d47c6e0c689143de932161a2cf9c65662c748ae0ef69f96be264ebb132",
+    "parity-cases.cjs": "b30e9219d96fd34015c884d45e12477be23fcc2bccd699f4d48e72aab5b63d0a",
+    "provenance.json": "6389785dbe7f874d01115844fe656ea30c5601533b6320b0bba6ec92d9afc133",
+    "regressions.mjs": "ddebeeee655ba5b97b370c3caad9aa086f2b88d3180df0af9b337483958b3088",
+    "reproduce.cjs": "824d6d1048f136b314e181f4e8f8d8cc73aa6a4c5a96abb497639e2f4623e4f1",
+    "sources.cjs": "36821771ed1e2aeed1587300e891943c77048c8d16f1f810aacee369de74792e",
+    "verifier.cjs": "2ce5e8b25136f9553cfa39185391803623a4d0c91995b0b7d3ad45c4c2ff33d4"
+  },
   "sourceHashes": {
-    "src/shared/node-readable-text.ts": "3e077b04805e343f8ac1e56843a512bfdb591fbb613f9e25d87ef7c2f6f64460",
     "src/main/native-chat/transcript-fallback-id.ts": "1fec8edecb738e64fb218ee9cdf530a20c51b804c35dcb7deb98f47c8e5499ea",
-    "src/main/native-chat/transcript-stream-lines.ts": "5f3a0a1e5b3d003076452fa22234af00502808ed6463672c0e58aa49ae5b6aa1",
+    "src/main/native-chat/transcript-stream-lines.ts": "f228f252f9dc3e9520c4195486df524ee0bcb258cd1c0c31046042df83675644",
     "src/main/claude/claude-transcript-branch-proof.ts": {
       "baseline": "3224594befe1edae514724caf5eff6a4cda85212e2985be4920b6164b088b82c",
       "candidate": "c2e0403d4a98eb5963da23988ad0fde24fc91d22b9e064e342fcfccb875e446f",
-      "windowCandidate": "8688711f711adf434c596dda729018e43cfa46ba746590187388e9f5e864648f"
+      "windowCandidate": "ddc33ebf0c5f1b628f2fe9223b41b3dc105e08d3dd48ca36dde9e1aec39387b5"
     },
     "src/main/runtime/orca-runtime-stop-structured-session-process.ts": "11b71f61bdad9cde89ac174a22f91937f2ba138e34bb58a86edeb568252a64b9"
   },
   "bundleHashes": {
     "baseline": "c7e5c410a974a3e95a371a1e7fc6e55356163850855a574d0c20fcef8dd93664",
-    "candidate": "8808e92487f7520b389d0c8889ebab4fddd4bcbcde017b656937eddc9d6c9179",
-    "windowCandidate": "5541ba91aa82818da0d49d6eeabdde98cbfc7017ecf6e3a0ba92a8c3920a14ef"
+    "candidate": "8df0e4d7c24be2ab1d6516c224297fb58154e010dc4e9ed0a0f9a74932c55c6d",
+    "windowCandidate": "0299932193257fc9e68bbb8e91f82d21b513e449adef48e612e236eca807977b"
   },
   "parity": [
     {
@@ -506,7 +528,7 @@
   ],
   "missingFile": "All three readers reject with ENOENT",
   "growth": {
-    "node": "v26.6.0",
+    "node": "v24.20.0",
     "method": "Append after native stat captures size; open-ended stream has no stat, so append before its first native read. Real files and actual proof methods.",
     "reports": [
       {
@@ -658,9 +680,11 @@
           },
           "windowCandidate": {
             "outcome": {
-              "status": "rejected",
-              "name": "ClaudeTranscriptTailIncompleteError",
-              "message": "Claude transcript branch proof failed: malformed JSONL"
+              "status": "fulfilled",
+              "value": {
+                "leafUuid": "root",
+                "relation": "initial"
+              }
             },
             "descriptorClosedAtReturn": true,
             "descriptorClosed": true
@@ -1287,7 +1311,7 @@
         }
       },
       {
-        "name": "missing-previous-not-repaired-by-growth",
+        "name": "missing-previous-repaired-by-growth",
         "initialBytes": 155,
         "appendedBytes": 159,
         "phases": {
@@ -1313,9 +1337,11 @@
           },
           "windowCandidate": {
             "outcome": {
-              "status": "rejected",
-              "name": "ClaudeTranscriptTailIncompleteError",
-              "message": "Claude transcript branch proof failed: malformed JSONL"
+              "status": "fulfilled",
+              "value": {
+                "leafUuid": "child",
+                "relation": "same"
+              }
             },
             "descriptorClosedAtReturn": true,
             "descriptorClosed": true
@@ -1323,7 +1349,7 @@
         }
       },
       {
-        "name": "missing-marker-not-repaired-by-growth",
+        "name": "missing-marker-repaired-by-growth",
         "initialBytes": 81,
         "appendedBytes": 74,
         "phases": {
@@ -1349,9 +1375,11 @@
           },
           "windowCandidate": {
             "outcome": {
-              "status": "rejected",
-              "name": "ClaudeTranscriptTailIncompleteError",
-              "message": "Claude transcript branch proof failed: malformed JSONL"
+              "status": "fulfilled",
+              "value": {
+                "leafUuid": "root",
+                "relation": "initial"
+              }
             },
             "descriptorClosedAtReturn": true,
             "descriptorClosed": true
@@ -1359,7 +1387,7 @@
         }
       },
       {
-        "name": "torn-prefix-not-repaired-by-growth",
+        "name": "torn-prefix-repaired-by-growth",
         "initialBytes": 153,
         "appendedBytes": 2,
         "phases": {
@@ -1385,9 +1413,11 @@
           },
           "windowCandidate": {
             "outcome": {
-              "status": "rejected",
-              "name": "ClaudeTranscriptTailIncompleteError",
-              "message": "Claude transcript branch proof failed: malformed JSONL"
+              "status": "fulfilled",
+              "value": {
+                "leafUuid": "root",
+                "relation": "initial"
+              }
             },
             "descriptorClosedAtReturn": true,
             "descriptorClosed": true
@@ -1403,23 +1433,23 @@
       "sourceBytes": 8391962,
       "baseline": {
         "records": 17,
-        "peakHeapIncrease": 9449080,
+        "peakHeapIncrease": 9431320,
         "peakExternalIncrease": 40,
-        "retainedHeapIncrease": 1832,
+        "retainedHeapIncrease": -15936,
         "retainedExternalIncrease": 40
       },
       "candidate": {
         "records": 17,
-        "peakHeapIncrease": 1128432,
+        "peakHeapIncrease": 1127728,
         "peakExternalIncrease": 134433,
-        "retainedHeapIncrease": 3784,
+        "retainedHeapIncrease": 7488,
         "retainedExternalIncrease": 0
       },
       "windowCandidate": {
         "records": 17,
-        "peakHeapIncrease": 1148192,
+        "peakHeapIncrease": 1146328,
         "peakExternalIncrease": 131495,
-        "retainedHeapIncrease": 15256,
+        "retainedHeapIncrease": 14904,
         "retainedExternalIncrease": 0
       }
     },
@@ -1429,23 +1459,23 @@
       "sourceBytes": 33567578,
       "baseline": {
         "records": 65,
-        "peakHeapIncrease": 34641208,
+        "peakHeapIncrease": 34636536,
         "peakExternalIncrease": 0,
-        "retainedHeapIncrease": 4456,
+        "retainedHeapIncrease": 4944,
         "retainedExternalIncrease": 0
       },
       "candidate": {
         "records": 65,
-        "peakHeapIncrease": 1181872,
+        "peakHeapIncrease": 1191624,
         "peakExternalIncrease": 144225,
-        "retainedHeapIncrease": 39880,
+        "retainedHeapIncrease": 40216,
         "retainedExternalIncrease": 0
       },
       "windowCandidate": {
         "records": 65,
-        "peakHeapIncrease": 1120280,
+        "peakHeapIncrease": 1129728,
         "peakExternalIncrease": 131495,
-        "retainedHeapIncrease": -29832,
+        "retainedHeapIncrease": -31000,
         "retainedExternalIncrease": 0
       }
     },
@@ -1455,23 +1485,23 @@
       "sourceBytes": 13146,
       "baseline": {
         "records": 65,
-        "peakHeapIncrease": 33472,
+        "peakHeapIncrease": 33416,
         "peakExternalIncrease": 0,
-        "retainedHeapIncrease": 144,
+        "retainedHeapIncrease": 72,
         "retainedExternalIncrease": 0
       },
       "candidate": {
         "records": 65,
-        "peakHeapIncrease": 40208,
+        "peakHeapIncrease": 40408,
         "peakExternalIncrease": 144225,
-        "retainedHeapIncrease": 528,
+        "retainedHeapIncrease": 896,
         "retainedExternalIncrease": 0
       },
       "windowCandidate": {
         "records": 65,
-        "peakHeapIncrease": 49144,
+        "peakHeapIncrease": 47072,
         "peakExternalIncrease": 13361,
-        "retainedHeapIncrease": 1784,
+        "retainedHeapIncrease": 1496,
         "retainedExternalIncrease": 0
       }
     },
@@ -1481,46 +1511,46 @@
       "sourceBytes": 8388902,
       "baseline": {
         "records": 2,
-        "peakHeapIncrease": 16781632,
+        "peakHeapIncrease": 16780568,
         "peakExternalIncrease": 0,
-        "retainedHeapIncrease": 2176,
+        "retainedHeapIncrease": 1112,
         "retainedExternalIncrease": 0
       },
       "candidate": {
         "records": 2,
-        "peakHeapIncrease": 16782616,
+        "peakHeapIncrease": 16782720,
         "peakExternalIncrease": 131373,
-        "retainedHeapIncrease": 472,
+        "retainedHeapIncrease": 736,
         "retainedExternalIncrease": 0
       },
       "windowCandidate": {
         "records": 2,
-        "peakHeapIncrease": 16791736,
+        "peakHeapIncrease": 16789672,
         "peakExternalIncrease": 509,
-        "retainedHeapIncrease": 1784,
+        "retainedHeapIncrease": 1584,
         "retainedExternalIncrease": 0
       }
     }
   ],
   "duration": {
-    "node": "v26.6.0",
+    "node": "v24.20.0",
     "records": 8193,
     "sourceBytes": 2793562,
     "method": "One stable real file, two warm rounds and five measured rounds, alternating phase order; no GC forced during timing. Whole proof, not an isolated parser benchmark.",
     "durationsMs": {
-      "baseline": [9.64, 8.27, 7.92, 7.63, 7.82],
-      "windowCandidate": [10.06, 10.19, 10.22, 9.72, 10.02]
+      "baseline": [8.72, 7.43, 7.52, 7.01, 7.07],
+      "windowCandidate": [10.29, 9.98, 9.61, 8.63, 8.83]
     },
     "medianMs": {
-      "baseline": 7.92,
-      "windowCandidate": 10.06
+      "baseline": 7.43,
+      "windowCandidate": 9.61
     }
   },
   "verifier": {
-    "method": "Exact current waitForStructuredClaudeTuiProof method body; live-owner/fresh-hook/path-resolution ports controlled, actual file reader and actual100ms retry timer.",
+    "method": "Exact current waitForStructuredClaudeTuiProof method body; live-owner/fresh-hook/path-resolution ports controlled, actual file reader and actual 100ms retry timer.",
     "reports": [
       {
-        "name": "growing-empty-prefix-retries",
+        "name": "growing-empty-prefix-refreshed-internally",
         "phases": {
           "baseline": {
             "attempts": 1,
@@ -1532,7 +1562,7 @@
             }
           },
           "windowCandidate": {
-            "attempts": 2,
+            "attempts": 1,
             "outcome": {
               "status": "fulfilled",
               "value": {
@@ -1543,7 +1573,7 @@
         }
       },
       {
-        "name": "growing-missing-marker-retries",
+        "name": "growing-missing-marker-refreshed-internally",
         "phases": {
           "baseline": {
             "attempts": 1,
@@ -1554,7 +1584,7 @@
             }
           },
           "windowCandidate": {
-            "attempts": 2,
+            "attempts": 1,
             "outcome": {
               "status": "fulfilled",
               "value": {
@@ -1565,7 +1595,7 @@
         }
       },
       {
-        "name": "growing-missing-previous-retries",
+        "name": "growing-missing-previous-refreshed-internally",
         "phases": {
           "baseline": {
             "attempts": 1,
@@ -1576,7 +1606,7 @@
             }
           },
           "windowCandidate": {
-            "attempts": 2,
+            "attempts": 1,
             "outcome": {
               "status": "fulfilled",
               "value": {

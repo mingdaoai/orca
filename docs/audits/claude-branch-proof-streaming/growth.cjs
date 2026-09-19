@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
+const fsPromises = require('node:fs/promises')
 const path = require('node:path')
 const { sessionId } = require('./parity-cases.cjs')
 
@@ -80,14 +81,14 @@ async function compareGrowth(scratch, modules) {
       options: { previousLeafUuid: 'old', intentionalRewindUuid: 'kept' }
     },
     {
-      name: 'missing-previous-not-repaired-by-growth',
+      name: 'missing-previous-repaired-by-growth',
       contents: rootRow + rootMarker,
       append,
       options: { previousLeafUuid: 'child' }
     },
-    { name: 'missing-marker-not-repaired-by-growth', contents: rootRow, append: rootMarker },
+    { name: 'missing-marker-repaired-by-growth', contents: rootRow, append: rootMarker },
     {
-      name: 'torn-prefix-not-repaired-by-growth',
+      name: 'torn-prefix-repaired-by-growth',
       contents: rootRow + rootMarker.slice(0, -2),
       append: '}\n'
     }
@@ -99,6 +100,15 @@ async function compareGrowth(scratch, modules) {
       const file = path.join(scratch, `growth-${phase}.jsonl`)
       fs.writeFileSync(file, scenario.contents)
       const binding = process.binding('fs')
+      const originalOpen = fsPromises.open
+      let openedHandle
+      fsPromises.open = async function (...args) {
+        const handle = await originalOpen.apply(this, args)
+        if (args[0] === file) {
+          openedHandle = handle
+        }
+        return handle
+      }
       const originalRead = binding.read
       const originalFstat = binding.fstat
       const originalCreateReadStream = fs.createReadStream
@@ -109,12 +119,14 @@ async function compareGrowth(scratch, modules) {
         return stream
       }
       let descriptor
+      let descriptorIdentity
       let injected = false
       let statsRead = 0
       function inject(fd) {
         if (!injected) {
           injected = true
           descriptor = fd
+          descriptorIdentity = fs.fstatSync(fd)
           if (scenario.append) {
             fs.appendFileSync(file, scenario.append)
           }
@@ -180,23 +192,25 @@ async function compareGrowth(scratch, modules) {
           ...(error.code ? { code: error.code } : {})
         }
       } finally {
+        fsPromises.open = originalOpen
         binding.read = originalRead
         binding.fstat = originalFstat
         fs.createReadStream = originalCreateReadStream
       }
-      let descriptorClosedAtReturn = false
-      try {
-        fs.fstatSync(descriptor)
-      } catch (error) {
-        descriptorClosedAtReturn = error.code === 'EBADF'
+      function isOriginalDescriptorClosed() {
+        if (openedHandle) {
+          return openedHandle.fd === -1
+        }
+        try {
+          const current = fs.fstatSync(descriptor)
+          return current.dev !== descriptorIdentity.dev || current.ino !== descriptorIdentity.ino
+        } catch (error) {
+          return error.code === 'EBADF'
+        }
       }
+      const descriptorClosedAtReturn = isOriginalDescriptorClosed()
       await streamClosed
-      let descriptorClosed = false
-      try {
-        fs.fstatSync(descriptor)
-      } catch (error) {
-        descriptorClosed = error.code === 'EBADF'
-      }
+      const descriptorClosed = isOriginalDescriptorClosed()
       assert(injected, 'Actual file read must reach deterministic injection point')
       assert(descriptorClosed, `${scenario.name}/${phase} leaked its actual file descriptor`)
       if (phase === 'windowCandidate') {
@@ -218,7 +232,7 @@ async function compareGrowth(scratch, modules) {
       assert.equal(phases.candidate.outcome.name, 'ClaudeTranscriptTailIncompleteError')
     } else if (
       !scenario.options &&
-      !scenario.name.includes('not-repaired') &&
+      !scenario.name.includes('repaired-by-growth') &&
       !scenario.statError &&
       !scenario.restatError
     ) {
@@ -227,11 +241,16 @@ async function compareGrowth(scratch, modules) {
     if (
       [
         'initially-empty-file',
-        'missing-previous-not-repaired-by-growth',
-        'missing-marker-not-repaired-by-growth'
+        'missing-previous-repaired-by-growth',
+        'missing-marker-repaired-by-growth',
+        'torn-prefix-repaired-by-growth'
       ].includes(scenario.name)
     ) {
-      assert.equal(phases.windowCandidate.outcome.name, 'ClaudeTranscriptTailIncompleteError')
+      assert.equal(phases.windowCandidate.outcome.status, 'fulfilled', scenario.name)
+      assert.equal(
+        phases.windowCandidate.outcome.value.leafUuid,
+        scenario.name === 'missing-previous-repaired-by-growth' ? 'child' : 'root'
+      )
     } else if (
       [
         'small-regular-file',
@@ -255,9 +274,6 @@ async function compareGrowth(scratch, modules) {
         leafUuid: 'kept',
         relation: 'intentional-rewind'
       })
-    }
-    if (scenario.name === 'torn-prefix-not-repaired-by-growth') {
-      assert.equal(phases.windowCandidate.outcome.name, 'ClaudeTranscriptTailIncompleteError')
     }
     reports.push({
       name: scenario.name,

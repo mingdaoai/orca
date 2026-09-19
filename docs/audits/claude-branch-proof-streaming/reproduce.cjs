@@ -36,6 +36,25 @@ async function capture(action) {
 }
 
 async function run() {
+  const provenance = require('./provenance.json')
+  for (const file of provenance.files) {
+    const source = fs.readFileSync(path.join(root, file.path), 'utf8')
+    assert.equal(hash(source), file.currentSha256, `Refresh provenance for ${file.path}`)
+    const lines = source.split('\n')
+    for (const site of file.currentCallSites) {
+      assert.equal(lines[site.line - 1].trim(), site.text, `${file.path}:${site.line}`)
+    }
+  }
+  const auditHashes = {}
+  for (const file of fs.readdirSync(__dirname)) {
+    if (
+      file.endsWith('.cjs') ||
+      file.endsWith('.mjs') ||
+      ['candidate-transform.json', 'fix.patch', 'provenance.json'].includes(file)
+    ) {
+      auditHashes[file] = hash(fs.readFileSync(path.join(__dirname, file)))
+    }
+  }
   const modules = {}
   const sourceHashes = {}
   const bundleHashes = {}
@@ -126,6 +145,17 @@ async function run() {
       'Actual production source; baseline reconstructed by reverse fix.patch; open-ended experiment retained as a control',
     measurement:
       'Forced GC at actual JSON.parse boundaries; sampled transient live bytes, not RSS, natural peak, or a retained-leak proof.',
+    runtime: {
+      node: process.version,
+      electron: process.versions.electron ?? null,
+      platform: process.platform,
+      arch: process.arch
+    },
+    toolVersions: {
+      esbuild: require('esbuild/package.json').version,
+      diff: require('diff/package.json').version
+    },
+    auditHashes,
     sourceHashes,
     bundleHashes,
     parity,

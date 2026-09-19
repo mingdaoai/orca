@@ -1,25 +1,33 @@
 {
   "reportedTag": "v1.4.198",
   "reportedTagCommit": "e0826956fcfc532f5a1e55b5e081f2e57e553c43",
-  "currentCommitAtCapture": "2c49d285115af945b7be13cdc6da4803671f0eeb",
-  "limits": "Source reachability/version evidence only; no user transcript or incident trigger evidence. Rewind branch support is newer than this tag.",
+  "currentCommitAtCapture": "2e623a227474101160de4c977bfae69da4b052ee",
+  "limits": "Source reachability/version evidence only; no user transcript or incident trigger evidence. Rewind branch support is newer than this tag. Current source hashes and call sites are checked by reproduce.cjs.",
   "files": [
     {
       "path": "src/main/claude/claude-transcript-branch-proof.ts",
-      "currentSha256": "3224594befe1edae514724caf5eff6a4cda85212e2985be4920b6164b088b82c",
+      "currentSha256": "ddc33ebf0c5f1b628f2fe9223b41b3dc105e08d3dd48ca36dde9e1aec39387b5",
       "reportedTagSha256": "79409696fc5bf385727d8710a5383acfe3ff350df5bdda93a79f7e97dcc54d1d",
       "identicalToTag": false,
       "currentCallSites": [
         {
-          "line": 232,
-          "text": "contents: await readFile(input.transcriptPath, 'utf8'),"
+          "line": 249,
+          "text": "export async function proveClaudeTranscriptBranch("
         },
         {
-          "line": 240,
+          "line": 252,
+          "text": "const handle = await open(input.transcriptPath, 'r')"
+        },
+        {
+          "line": 261,
+          "text": "const stream = handle.createReadStream({ start: 0, end: size - 1, autoClose: false })"
+        },
+        {
+          "line": 296,
           "text": "export async function readClaudeTranscriptLeafWithReproof(input: {"
         },
         {
-          "line": 241,
+          "line": 297,
           "text": "readTranscriptLeaf: (input: {"
         }
       ],
@@ -40,20 +48,20 @@
     },
     {
       "path": "src/main/runtime/structured-claude-runtime-adapter.ts",
-      "currentSha256": "10497152ac595562f19c7db67180ae93fdb0517946b4997977e677397ae957ec",
+      "currentSha256": "553c8e10458a3a5b1dcbfaef0db4033c8476889a4345a35ed542c8dd3d947428",
       "reportedTagSha256": "4b347b8222ca18eb4bd728a57c307226ba2a279e14fd5ebd4fbfac877aacc8f0",
       "identicalToTag": false,
       "currentCallSites": [
         {
-          "line": 41,
+          "line": 44,
           "text": "export function createStructuredClaudeRuntimeAdapter("
         },
         {
-          "line": 74,
+          "line": 80,
           "text": "readTranscriptLeaf: async ({"
         },
         {
-          "line": 94,
+          "line": 100,
           "text": "? await readClaudeTranscriptLeafUuid(transcriptPath, providerSessionId, previousLeafUuid)"
         }
       ],
@@ -126,7 +134,7 @@
     },
     {
       "path": "src/main/claude/claude-structured-session-adapter.ts",
-      "currentSha256": "4a2fc01bab206adf2de7dd63ee5e29e9732dcadbf9530146f81bd05a49881d19",
+      "currentSha256": "5227f8fd56648ba3820b307f6a0d860cffa6ac2184330a21a489bb54e2b8b445",
       "reportedTagSha256": "87a40dea24a0d742164c9ab2c28f14a05d5a44bf6e511e0b72a280dc083d93d0",
       "identicalToTag": false,
       "currentCallSites": [
@@ -242,12 +250,12 @@
     },
     {
       "path": "src/main/runtime/structured-agent-session-runtime.ts",
-      "currentSha256": "de0fbb7968e922e21c4d374c3b0315fcb8c7099c9ec2c9aab163e090965e8c0b",
+      "currentSha256": "ce6da207cd354ac372e6aa260a12463a252568909180c4ab217491f2565262aa",
       "reportedTagSha256": "65f43aaa10363e54159cac9e84e62e89be122c4372c2f41136b053b81a252bae",
       "identicalToTag": false,
       "currentCallSites": [
         {
-          "line": 287,
+          "line": 295,
           "text": "const claude = createStructuredClaudeRuntimeAdapter({"
         }
       ],
@@ -260,12 +268,12 @@
     },
     {
       "path": "src/main/native-chat/transcript-stream-lines.ts",
-      "currentSha256": "5f3a0a1e5b3d003076452fa22234af00502808ed6463672c0e58aa49ae5b6aa1",
+      "currentSha256": "f228f252f9dc3e9520c4195486df524ee0bcb258cd1c0c31046042df83675644",
       "reportedTagSha256": "4f3ed634f81521f05e39cc9c9a4e96450e891440372ddb34854d1c295af1f1bc",
       "identicalToTag": false,
       "currentCallSites": [
         {
-          "line": 53,
+          "line": 44,
           "text": "export async function* splitTranscriptStreamLines("
         }
       ],

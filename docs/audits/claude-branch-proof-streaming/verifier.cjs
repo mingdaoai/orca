@@ -38,18 +38,23 @@ async function compareVerifier(scratch, modules) {
   const child = row('child', 'root')
   const cases = [
     {
-      name: 'growing-empty-prefix-retries',
+      name: 'growing-empty-prefix-refreshed-internally',
       contents: '',
       append: root + marker('root'),
-      retry: true
+      refresh: true
     },
-    { name: 'growing-missing-marker-retries', contents: root, append: marker('root'), retry: true },
     {
-      name: 'growing-missing-previous-retries',
+      name: 'growing-missing-marker-refreshed-internally',
+      contents: root,
+      append: marker('root'),
+      refresh: true
+    },
+    {
+      name: 'growing-missing-previous-refreshed-internally',
       contents: root + marker('root'),
       append: child + marker('child'),
       previousLeafUuid: 'child',
-      retry: true
+      refresh: true
     },
     { name: 'static-empty-fatal', contents: '', error: 'Error' },
     { name: 'static-missing-marker-fatal', contents: root, error: 'Error' },
@@ -120,9 +125,9 @@ async function compareVerifier(scratch, modules) {
         assert.equal(phases[phase].outcome.name, scenario.error, `${scenario.name}/${phase}`)
         assert.equal(phases[phase].attempts, 1)
       }
-      if (phase === 'windowCandidate' && scenario.retry) {
+      if (phase === 'windowCandidate' && scenario.refresh) {
         assert.equal(phases[phase].outcome.status, 'fulfilled')
-        assert.equal(phases[phase].attempts, 2)
+        assert.equal(phases[phase].attempts, 1)
       }
       if (scenario.name === 'successful-prefix-stays-prefix') {
         assert.equal(phases[phase].outcome.value.leafUuid, 'root')
@@ -136,7 +141,7 @@ async function compareVerifier(scratch, modules) {
   }
   return {
     method:
-      'Exact current waitForStructuredClaudeTuiProof method body; live-owner/fresh-hook/path-resolution ports controlled, actual file reader and actual100ms retry timer.',
+      'Exact current waitForStructuredClaudeTuiProof method body; live-owner/fresh-hook/path-resolution ports controlled, actual file reader and actual 100ms retry timer.',
     reports
   }
 }
