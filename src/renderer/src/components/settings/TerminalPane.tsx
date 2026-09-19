@@ -46,6 +46,22 @@ type TerminalPaneProps = {
   isWindowsTerminalHost?: boolean
 }
 
+export function getInitialCustomShell({
+  configuredShell,
+  systemShell,
+  isMac
+}: {
+  configuredShell: string
+  systemShell: string
+  isMac: boolean
+}): string {
+  const existingShell = configuredShell.trim()
+  if (existingShell) {
+    return existingShell
+  }
+  return isMac ? '/bin/zsh' : systemShell.trim() || '/bin/bash'
+}
+
 export function TerminalPane({
   settings,
   updateSettings,
@@ -98,7 +114,12 @@ export function TerminalPane({
             value={shellMode}
             onChange={(value) => {
               setShellValidationError(null)
-              updateSettings({ terminalDefaultShell: value === 'system' ? '' : configuredShell })
+              updateSettings({
+                terminalDefaultShell:
+                  value === 'system'
+                    ? ''
+                    : getInitialCustomShell({ configuredShell, systemShell, isMac })
+              })
             }}
             options={[
               { value: 'system', label: `System shell (${systemShell})` },
