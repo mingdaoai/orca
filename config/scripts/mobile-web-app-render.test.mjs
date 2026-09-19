@@ -702,6 +702,9 @@ describeRender('the stack the page Back button rests on', () => {
     await waitForRoute(opened, EDIT_ROUTE, 'Edit host')
     expect(await opened.page.evaluate(() => history.length)).toBe(entriesBefore + 1)
     expect(await clickAndSettle(opened.page, BACK_ON_EDIT)).toBe(EDIT_ROUTE)
+    // This case drives a synthetic `popstate`, so a throw under the fault boundary would leave the
+    // page exactly where the assertion above wants it and read as the absence this claims.
+    expect(opened.errors).toEqual([])
     await opened.page.close()
   }, 60_000)
 })
