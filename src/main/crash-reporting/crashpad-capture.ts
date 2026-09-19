@@ -300,7 +300,13 @@ export async function captureMinidumpSignature(
         const handle = await open(
           dump.filePath,
           noFollow === 0 ? 'r' : fsConstants.O_RDONLY | noFollow
-        )
+        ).catch(() => {
+          rejectedDumpPaths.add(dump.filePath)
+          return null
+        })
+        if (handle === null) {
+          return null
+        }
         let signature: MinidumpCrashSignature | null
         let sizeBytes: number
         try {

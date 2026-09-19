@@ -1,10 +1,10 @@
 {
-  "docs/audits/crashpad-read-limit/reproduce.mjs": "92bb28ff3a1c1fe95193c1fb7afdb5ab693d22613849d22f9862334204ff7f4d",
+  "docs/audits/crashpad-read-limit/reproduce.mjs": "f933664d7956dc935dc54873f43f1e9628830e4eb30f85759ba7dc2590b3c276",
   "docs/audits/crashpad-read-limit/stream-signature-parity.cjs": "7ed52f7c94ff888e48b0dcdcdce0ca3b5135dd9dd8b237309321b2a87b64426d",
   "package.json": "039a5464a296a1ad4cd0456154da71843e1bd3c63337e24c3767119f44a573ec",
   "pnpm-lock.yaml": "759c01a2687e953a9adc5c09332bafa193471ba6ec4875468565abb4ddf0d498",
-  "src/main/crash-reporting/crashpad-capture-read-limit.test.ts": "549bf2f94592899f80fef0eedd9193009a405ff27f06b81bf9e532e2cdf63241",
-  "src/main/crash-reporting/crashpad-capture.ts": "4357fc611dd54445526af7a1d792b4ea5b01e315f195aadd10fe1dc98dd2bf21",
+  "src/main/crash-reporting/crashpad-capture-read-limit.test.ts": "259050b4b65d68cccf2597aed5f3776237028dd9b5653b0963a391ba4171a1f3",
+  "src/main/crash-reporting/crashpad-capture.ts": "43ebef6ef55c0639df7c69fbfdb8a9f4d899db67dd4de7d56adae7e47bef8c77",
   "src/main/crash-reporting/minidump-crash-signature.test.ts": "2a393e98c5cf5c70e371e17baf7c689871180db0e84585f547d094a2ae05e6b9",
   "src/main/crash-reporting/minidump-crash-signature.ts": "e82d9739727ec04cbae845495d68ae08d1dc5c5045445832882b8a0547396fca",
   "src/main/crash-reporting/minidump-crashpad-annotations.ts": "34b136b27eb95b713c857df4f40eb4e82e63889883426c606c0f94210c69050e",

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { constants as fsConstants } from 'node:fs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
@@ -117,18 +118,19 @@ try {
   const expectedFailures = [1, 2].map(
     (pages) => `stops observing a growing size-zero dump after the deadline at page ${pages}`
   )
+  const skippedSymlink = fsConstants.O_NOFOLLOW ? 0 : 1
   const passed =
     withoutDeadlineResult.exitCode === 1 &&
     !withoutDeadlineResult.timedOut &&
     withoutDeadlineResult.failed === 2 &&
-    withoutDeadlineResult.passed === 21 &&
-    withoutDeadlineResult.skipped === 0 &&
+    withoutDeadlineResult.passed === 24 - skippedSymlink &&
+    withoutDeadlineResult.skipped === skippedSymlink &&
     JSON.stringify(withoutDeadlineResult.failedCases) === JSON.stringify(expectedFailures) &&
     fixed.exitCode === 0 &&
     !fixed.timedOut &&
-    fixed.passed === 23 &&
+    fixed.passed === 26 - skippedSymlink &&
     fixed.failed === 0 &&
-    fixed.skipped === 0
+    fixed.skipped === skippedSymlink
   const result = {
     comparison:
       'Current capture and file-source regressions; negative control removes only the extent deadline in memory.',

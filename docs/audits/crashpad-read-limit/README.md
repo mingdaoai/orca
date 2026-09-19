@@ -26,8 +26,8 @@ not a simulation of every behavior in the original implementation.
 
 | Phase                  | Pass | Fail | Skip | Exit |
 | ---------------------- | ---: | ---: | ---: | ---: |
-| Deadline removed       |   21 |    2 |    0 |    1 |
-| Current implementation |   23 |    0 |    0 |    0 |
+| Deadline removed       |   24 |    2 |    0 |    1 |
+| Current implementation |   26 |    0 |    0 |    0 |
 
 The two expected failures verify that a file reported as size zero stops being read at
 the deadline, after either one or two pages, even though more bytes remain available.
@@ -37,7 +37,7 @@ The runner checks their exact names and exits unsuccessfully for unexpected resu
 
 Other controls cover 80 MiB sparse dumps, metadata beyond 64 MiB, marker/check-message
 boundaries, growth and replacement during capture, zero-size growth, truncation, descriptor
-cleanup and partial-header retry behavior. The largest requested parser read is 1 MiB +
+cleanup and partial-header retry behavior. A symlink swap, deleted candidate, or directory replacement now skips only that candidate; another valid dump can still supply the signature. The symlink-swap test is skipped on platforms without `O_NOFOLLOW`. The largest requested parser read is 1 MiB +
 4,096 bytes, plus four retained 64 KiB metadata pages. A 1,042-module fixture requires no
 more than eight reads, preventing repeated reads between module and name pages.
 

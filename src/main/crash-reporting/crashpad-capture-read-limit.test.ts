@@ -1,6 +1,17 @@
 import type * as FsModule from 'node:fs/promises'
 import type * as ParserModule from './minidump-crash-signature'
-import { mkdtemp, mkdir, open, rm, rename, truncate, utimes, writeFile } from 'node:fs/promises'
+import { constants as fsConstants } from 'node:fs'
+import {
+  mkdtemp,
+  mkdir,
+  open,
+  rm,
+  rename,
+  symlink,
+  truncate,
+  utimes,
+  writeFile
+} from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -254,4 +265,39 @@ it('reports the observed shorter extent when the opened dump shrinks while readi
   const result = await capture()
   expect(result?.signature.processType).toBe('renderer')
   expect(result?.sizeBytes).toBe(131)
+})
+
+it.skipIf(!fsConstants.O_NOFOLLOW)(
+  'skips a swapped symlink and captures another valid dump',
+  async () => {
+    const next = await file('next.dmp')
+    const race = await file('swapped.dmp', true)
+    state.callbacks.afterStat = async (path) => {
+      if (path === race) {
+        state.callbacks.afterStat = undefined
+        await rm(race)
+        await symlink(next, race)
+      }
+    }
+    expect((await capture())?.filePath).toBe(next)
+    expect(state.parsedBytes).toEqual([131])
+    expect(state.closedPaths).toEqual([next])
+  }
+)
+
+it.each(['missing', 'directory'] as const)('skips a candidate replaced by %s', async (kind) => {
+  const next = await file('next.dmp')
+  const race = await file('swapped.dmp', true)
+  state.callbacks.afterStat = async (path) => {
+    if (path === race) {
+      state.callbacks.afterStat = undefined
+      await rm(race)
+      if (kind === 'directory') {
+        await mkdir(race)
+      }
+    }
+  }
+  expect((await capture())?.filePath).toBe(next)
+  expect(state.parsedBytes).toEqual([131])
+  expect(state.closedPaths).toContain(next)
 })
